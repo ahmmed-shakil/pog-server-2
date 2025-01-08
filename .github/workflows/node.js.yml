@@ -54,4 +54,4 @@ jobs:
 
       - name: Reload PM2 with updated environment
         run: |
-          pm2 restart BackendAPI 
+          pm2 restart BackendAPI2 

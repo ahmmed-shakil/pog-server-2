@@ -1,4 +1,4 @@
-name: Node.js CI/CD Pipeline
+name: Node.js CI/CD Pipeline Server 2
 
 on:
   push:

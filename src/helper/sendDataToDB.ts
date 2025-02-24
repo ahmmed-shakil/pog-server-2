@@ -123,7 +123,7 @@ export const sendDataToDb = async (response: any) => {
             total_discount: parseInt(item.total_discount),
             total_tax: parseInt(item.total_tax),
             restaurantID: restaurantId,
-            createdAt: new Date(Order.created_date),
+            createdAt: new Date(Order.created),
             packingCharge: parseInt(item.packing_charge),
             NCFlag: parseInt(item.price) === 0 ? true : false,
           };
@@ -176,7 +176,7 @@ export const sendDataToDb = async (response: any) => {
           restaurant_area_id: restaurant_area.id,
           order_payment_type_id: find_order_payment_type.id,
           new_order_type_id: new_order_type?.id,
-          created_at: new Date(Order.created_date),
+          created_at: new Date(Order.created),
           payment_status: Order.payment_confirmation,
           cancel_reason: Order.cancel_order_description || null,
           order_amount: parseFloat(Order.core_price),

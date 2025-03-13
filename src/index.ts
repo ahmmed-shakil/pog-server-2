@@ -48,13 +48,14 @@ const receiveMessage = async () => {
 
       // Read the contents of the downloaded file
       const response = await getDataFromFile(filePath);
+      console.log('🚀 ~ receiveMessage ~ response:', response);
       if (!response) {
         throw new Error('Failed to extract data from file');
       }
 
       // Send the extracted data to the database for storage
       const fileProcessingStatus = await sendDataToDb(response);
-      console.log(fileProcessingStatus);
+      // console.log(fileProcessingStatus, 'status');
 
       if (!fileProcessingStatus) {
         throw new Error('Failed to send data to database');

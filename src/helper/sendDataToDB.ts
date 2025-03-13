@@ -5,9 +5,13 @@ export const sendDataToDb = async (response: any) => {
   try {
     for (const orderData of response) {
       const { Order, OrderItem } = orderData;
-      const checkOrderExists = await prisma.order.findUnique({ where: { invoice_id: parseInt(Order.invoice_id) } });
+      if (!Order?.id) {
+        console.log(`Skippingn Order as order_id not found`);
+        return;
+      }
+      const checkOrderExists = await prisma.order.findUnique({ where: { order_id: Order?.id?.toString() } });
       if (checkOrderExists) {
-        console.log(`Skippingn Order as invoice_id already exists`);
+        console.log(`Skippingn Order as order_id already exists`);
         return;
       }
 
@@ -73,7 +77,7 @@ export const sendDataToDb = async (response: any) => {
               createGroup = await prisma.restaurant_new_SKU_group.create({
                 data: { group_category_id: parseInt(item.group_category_id), group_name: item_extra_data.g_name, restaurant_id: restaurantId },
               });
-              console.log('🚀 ~ orderData.OrderItem.map ~ createGroup:', createGroup);
+              // console.log('🚀 ~ orderData.OrderItem.map ~ createGroup:', createGroup);
             }
 
             // Create restaurant_new_SKU_category
@@ -84,7 +88,7 @@ export const sendDataToDb = async (response: any) => {
               createCategory = await prisma.restaurant_new_SKU_category.create({
                 data: { category_id: parseInt(item_extra_data.c_id), category_name: item_extra_data.c_name, restaurant_id: restaurantId },
               });
-              console.log('🚀 ~ orderData.OrderItem.map ~ createCategory:', createCategory);
+              // console.log('🚀 ~ orderData.OrderItem.map ~ createCategory:', createCategory);
             }
 
             // Create restaurant_new_SKU_variants
@@ -171,6 +175,7 @@ export const sendDataToDb = async (response: any) => {
       // Create Order
       const createdOrder = await prisma.order.create({
         data: {
+          order_id: Order?.id?.toString(),
           restaurant_id: parseInt(Order.restaurant_id),
           invoice_id: parseInt(Order.invoice_id),
           restaurant_area_id: restaurant_area.id,
@@ -199,11 +204,11 @@ export const sendDataToDb = async (response: any) => {
           },
         },
       });
-      console.log('🚀 ~ sendDataToDb ~ createdOrder:', createdOrder);
+      // console.log('🚀 ~ sendDataToDb ~ createdOrder:', createdOrder);
     }
     return true;
   } catch (error) {
-    console.error('Error sending data to DB:', error);
+    // console.error('Error sending data to DB:', error);
     return false; // Return false if there's an error
   }
 };

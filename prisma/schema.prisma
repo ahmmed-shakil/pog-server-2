@@ -39,7 +39,7 @@ model Order {
   cancel_reason             String?
   created_at                DateTime
   delivery_charges          Float?
-  invoice_id                Int                 @unique
+  invoice_id                Int
   net_amount_after_discount Float?
   new_order_type_id         String?
   non_taxable_amount        Float?
@@ -55,6 +55,7 @@ model Order {
   total_tax                 Float?
   custom_payment_type       String?
   payment_type              Int?
+  order_id                  String              @unique
   new_order_type            new_order_type?     @relation(fields: [new_order_type_id], references: [id])
   order_payment_type        order_payment_type? @relation(fields: [order_payment_type_id], references: [id])
   restaurant_area           restaurant_area?    @relation(fields: [restaurant_area_id], references: [id])
@@ -180,6 +181,8 @@ model admin_users {
   store_SKU_sections_store_SKU_sections_approvedByAdminUserIDToadmin_users                           store_SKU_sections[]              @relation("store_SKU_sections_approvedByAdminUserIDToadmin_users")
   store_SKU_sections_store_SKU_sections_createdByAdminUserIDToadmin_users                            store_SKU_sections[]              @relation("store_SKU_sections_createdByAdminUserIDToadmin_users")
   store_SKU_sections_store_SKU_sections_updatedByAdminUserIDToadmin_users                            store_SKU_sections[]              @relation("store_SKU_sections_updatedByAdminUserIDToadmin_users")
+  unit_expenses_tally_data_unit_expenses_tally_data_createdByUserIDToadmin_users                     unit_expenses_tally_data[]        @relation("unit_expenses_tally_data_createdByUserIDToadmin_users")
+  unit_expenses_tally_data_unit_expenses_tally_data_updatedByUserIDToadmin_users                     unit_expenses_tally_data[]        @relation("unit_expenses_tally_data_updatedByUserIDToadmin_users")
   vendor_categories_vendor_categories_approvedByAdminUserIDToadmin_users                             vendor_categories[]               @relation("vendor_categories_approvedByAdminUserIDToadmin_users")
   vendor_categories_vendor_categories_createdByAdminUserIDToadmin_users                              vendor_categories[]               @relation("vendor_categories_createdByAdminUserIDToadmin_users")
   vendor_categories_vendor_categories_updatedByAdminUserIDToadmin_users                              vendor_categories[]               @relation("vendor_categories_updatedByAdminUserIDToadmin_users")
@@ -300,6 +303,7 @@ model gas_readings {
   approvedByAdminUserID                                            String?
   createdByAdminUserID                                             String?
   updatedByAdminUserID                                             String?
+  enabled                                                          Boolean           @default(true)
   admin_users_gas_readings_admin_usersIdToadmin_users              admin_users?      @relation("gas_readings_admin_usersIdToadmin_users", fields: [admin_usersId], references: [id])
   admin_users_gas_readings_approvedByAdminUserIDToadmin_users      admin_users?      @relation("gas_readings_approvedByAdminUserIDToadmin_users", fields: [approvedByAdminUserID], references: [id], onDelete: Cascade)
   restaurant_users_gas_readings_approvedByUserIDTorestaurant_users restaurant_users? @relation("gas_readings_approvedByUserIDTorestaurant_users", fields: [approvedByUserID], references: [id])
@@ -625,6 +629,7 @@ model restaurant {
   restaurant_users_restaurant_chefIDTorestaurant_users       restaurant_users?                 @relation("restaurant_chefIDTorestaurant_users", fields: [chefID], references: [id])
   restaurant_users_restaurant_storeIDTorestaurant_users      restaurant_users?                 @relation("restaurant_storeIDTorestaurant_users", fields: [storeID], references: [id])
   restaurant_expenses                                        restaurant_expenses[]
+  restaurant_issues                                          restaurant_issues[]
   restaurant_users_restaurant_users_restaurantIDTorestaurant restaurant_users[]                @relation("restaurant_users_restaurantIDTorestaurant")
   store_inventory                                            store_inventory[]
   unit_expenses_tally_data                                   unit_expenses_tally_data[]
@@ -772,7 +777,7 @@ model restaurant_expenses {
 model restaurant_issued_items {
   id                            String                        @id
   restaurantRecquisitionItemID  String
-  quantityIssued                Int
+  quantityIssued                Float
   remarks                       String?
   createdAt                     DateTime                      @default(now())
   updatedAt                     DateTime
@@ -781,7 +786,7 @@ model restaurant_issued_items {
   purchaseId                    String?
   storeSKUSectionID             String?
   isDeleted                     Boolean                       @default(false)
-  amount                        Int                           @default(0)
+  amount                        Float                         @default(0)
   store_purchase                store_purchase?               @relation(fields: [purchaseId], references: [id])
   restaurant_recquisition_items restaurant_recquisition_items @relation(fields: [restaurantRecquisitionItemID], references: [id])
   restaurant_issues             restaurant_issues?            @relation(fields: [restaurant_issuesId], references: [id])
@@ -802,11 +807,13 @@ model restaurant_issues {
   approvedByAdminUserID                                                 String?
   createdByAdminUserID                                                  String?
   updatedByAdminUserID                                                  String?
+  restaurantID                                                          String?
   restaurant_issued_items                                               restaurant_issued_items[]
   admin_users_restaurant_issues_approvedByAdminUserIDToadmin_users      admin_users?              @relation("restaurant_issues_approvedByAdminUserIDToadmin_users", fields: [approvedByAdminUserID], references: [id], onDelete: Cascade)
   restaurant_users_restaurant_issues_approvedByUserIDTorestaurant_users restaurant_users?         @relation("restaurant_issues_approvedByUserIDTorestaurant_users", fields: [approvedByUserID], references: [id])
   admin_users_restaurant_issues_createdByAdminUserIDToadmin_users       admin_users?              @relation("restaurant_issues_createdByAdminUserIDToadmin_users", fields: [createdByAdminUserID], references: [id], onDelete: Cascade)
   restaurant_users_restaurant_issues_createdByUserIDTorestaurant_users  restaurant_users?         @relation("restaurant_issues_createdByUserIDTorestaurant_users", fields: [createdByUserID], references: [id])
+  restaurant                                                            restaurant?               @relation(fields: [restaurantID], references: [id])
   restaurant_recquisitions                                              restaurant_recquisitions  @relation(fields: [restaurantRecquisitionID], references: [id])
   admin_users_restaurant_issues_updatedByAdminUserIDToadmin_users       admin_users?              @relation("restaurant_issues_updatedByAdminUserIDToadmin_users", fields: [updatedByAdminUserID], references: [id], onDelete: Cascade)
   restaurant_users_restaurant_issues_updatedByUserIDTorestaurant_users  restaurant_users?         @relation("restaurant_issues_updatedByUserIDTorestaurant_users", fields: [updatedByUserID], references: [id])
@@ -830,9 +837,9 @@ model restaurant_recquisition_items {
   id                       String                    @id
   srNo                     Int
   SKUItemVariantID         String?
-  stockInHand              Int?
-  requiredQuantity         Int
-  alreadyIssuedQuantity    Int?
+  stockInHand              Float?
+  requiredQuantity         Float
+  alreadyIssuedQuantity    Float?
   remarks                  String?
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime
@@ -1027,8 +1034,8 @@ model store_SKU_item_variants {
   isNCItem                                                                    Boolean                                  @default(false)
   SKUItemID                                                                   String
   SKUItemVariantName                                                          String
-  SKUItemVariantQuantity                                                      Int
-  SKUItemVariantRate                                                          Int?
+  SKUItemVariantQuantity                                                      Float
+  SKUItemVariantRate                                                          Float?
   SKUItemVariantExpirationDate                                                DateTime?
   approvalStatus                                                              Boolean                                  @default(false)
   createdAt                                                                   DateTime                                 @default(now())
@@ -1041,6 +1048,7 @@ model store_SKU_item_variants {
   approvedByAdminUserID                                                       String?
   createdByAdminUserID                                                        String?
   updatedByAdminUserID                                                        String?
+  brandName                                                                   String?
   non_chargeable_sales                                                        non_chargeable_sales[]
   non_chargeable_sales_entries_v2                                             non_chargeable_sales_entries_v2[]
   non_chargeable_sales_v2                                                     non_chargeable_sales_v2[]
@@ -1061,8 +1069,8 @@ model store_SKU_item_variants {
 model store_SKU_item_variants_purchase_rates {
   id                      String                  @id
   SKUItemVariantID        String
-  SKUItemVariantNewRate   Int
-  SKUItemVariantOldRate   Int?
+  SKUItemVariantNewRate   Float
+  SKUItemVariantOldRate   Float?
   createdAt               DateTime                @default(now())
   updatedAt               DateTime
   remarks                 String?
@@ -1160,20 +1168,20 @@ model store_purchase {
   restaurantID            String?
   vendorID                String
   storeSKUItemVariantsID  String
-  storePurchaseRate       Int
+  storePurchaseRate       Float
   createdAt               DateTime                  @default(now())
   updatedAt               DateTime
   restaurantUserID        String?
-  availableStock          Int?
+  availableStock          Float?
   monthIndex              Int
-  totalIssues             Int?
-  totalPurchases          Int?
+  totalIssues             Float?
+  totalPurchases          Float?
   year                    Int
-  openingQuantity         Int                       @default(0)
-  storePurchaseAmount     Int
-  storePurchaseQuantity   Int
+  openingQuantity         Float                     @default(0)
+  storePurchaseAmount     Float
+  storePurchaseQuantity   Float
   isDeleted               Boolean                   @default(false)
-  totalWasted             Int                       @default(0)
+  totalWasted             Float                     @default(0)
   restaurant_issued_items restaurant_issued_items[]
   restaurant_users        restaurant_users?         @relation(fields: [restaurantUserID], references: [id])
   store_SKU_item_variants store_SKU_item_variants   @relation(fields: [storeSKUItemVariantsID], references: [id])
@@ -1185,8 +1193,8 @@ model store_purchase_entries {
   id                    String         @id
   purchaseId            String
   purchaseDate          String
-  storePurchaseQuantity Int
-  storePurchaseAmount   Int?
+  storePurchaseQuantity Float
+  storePurchaseAmount   Float?
   createdAt             DateTime       @default(now())
   updatedAt             DateTime
   isDeleted             Boolean        @default(false)
@@ -1300,21 +1308,25 @@ model temporary_order_master {
 }
 
 model unit_expenses_tally_data {
-  id                              String                           @id
-  documentUploadTrackingTableID   String?
-  restaurantID                    String?
-  expenseCategoryID               String
-  expenseVendor                   String
-  expenseParticularDescription    String?
-  expenseAmount                   Int                              @default(0)
-  expenseDate                     String
-  createdAt                       DateTime                         @default(now())
-  updatedAt                       DateTime
-  expenseType                     String
-  isDeleted                       Boolean                          @default(false)
-  document_uploads_tracking_table document_uploads_tracking_table? @relation(fields: [documentUploadTrackingTableID], references: [id])
-  expense_tally_data_categories   expense_tally_data_categories    @relation(fields: [expenseCategoryID], references: [id])
-  restaurant                      restaurant?                      @relation(fields: [restaurantID], references: [id])
+  id                                                                String                           @id
+  documentUploadTrackingTableID                                     String?
+  restaurantID                                                      String?
+  expenseCategoryID                                                 String
+  expenseVendor                                                     String
+  expenseParticularDescription                                      String?
+  expenseAmount                                                     Int                              @default(0)
+  expenseDate                                                       String
+  createdAt                                                         DateTime                         @default(now())
+  updatedAt                                                         DateTime
+  expenseType                                                       String
+  isDeleted                                                         Boolean                          @default(false)
+  createdByUserID                                                   String?
+  updatedByUserID                                                   String?
+  admin_users_unit_expenses_tally_data_createdByUserIDToadmin_users admin_users?                     @relation("unit_expenses_tally_data_createdByUserIDToadmin_users", fields: [createdByUserID], references: [id])
+  document_uploads_tracking_table                                   document_uploads_tracking_table? @relation(fields: [documentUploadTrackingTableID], references: [id])
+  expense_tally_data_categories                                     expense_tally_data_categories    @relation(fields: [expenseCategoryID], references: [id])
+  restaurant                                                        restaurant?                      @relation(fields: [restaurantID], references: [id])
+  admin_users_unit_expenses_tally_data_updatedByUserIDToadmin_users admin_users?                     @relation("unit_expenses_tally_data_updatedByUserIDToadmin_users", fields: [updatedByUserID], references: [id])
 }
 
 model vendor_categories {
@@ -1402,7 +1414,7 @@ model waste_management_items {
   restaurantUserID                                                           String
   storeSKUItemVariantID                                                      String?
   restaurantSKUItemVariantID                                                 String?
-  wastedItemQuantity                                                         Int
+  wastedItemQuantity                                                         Float
   approvalStatus                                                             Boolean                       @default(false)
   createdAt                                                                  DateTime                      @default(now())
   updatedAt                                                                  DateTime
@@ -1415,6 +1427,7 @@ model waste_management_items {
   approvedByAdminUserID                                                      String?
   createdByAdminUserID                                                       String?
   updatedByAdminUserID                                                       String?
+  date                                                                       DateTime                      @default(now())
   admin_users_waste_management_items_admin_usersIdToadmin_users              admin_users?                  @relation("waste_management_items_admin_usersIdToadmin_users", fields: [admin_usersId], references: [id])
   admin_users_waste_management_items_approvedByAdminUserIDToadmin_users      admin_users?                  @relation("waste_management_items_approvedByAdminUserIDToadmin_users", fields: [approvedByAdminUserID], references: [id], onDelete: Cascade)
   restaurant_users_waste_management_items_approvedByUserIDTorestaurant_users restaurant_users?             @relation("waste_management_items_approvedByUserIDTorestaurant_users", fields: [approvedByUserID], references: [id])
@@ -1773,6 +1786,7 @@ enum OrderTypeEnum {
 enum StoreSectionType {
   food
   fuel
+  bar
 }
 
 enum Type {

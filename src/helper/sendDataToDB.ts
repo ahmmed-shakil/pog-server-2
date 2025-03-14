@@ -4,6 +4,7 @@ import prisma from '../config/prisma';
 export const sendDataToDb = async (response: any) => {
   try {
     for (const orderData of response) {
+      // console.log('🚀 ~ sendDataToDb ~ orderData:', orderData);
       const { Order, OrderItem } = orderData;
       if (!Order?.id) {
         console.log(`Skippingn Order as order_id not found`);
@@ -105,7 +106,7 @@ export const sendDataToDb = async (response: any) => {
             createItem = prisma.restaurant_new_SKU_items.create({
               data: {
                 item_id: parseInt(item.item_id),
-                price: parseInt(item.price),
+                price: parseFloat(item.price),
                 ncFlag: parseInt(item.price) === 0 ? true : false,
                 name: item.name,
                 restaurant_id: restaurantId,
@@ -120,15 +121,15 @@ export const sendDataToDb = async (response: any) => {
 
           return {
             item_id: itemExistsById?.id || itemExistsByName?.id || (await createItem)?.id,
-            quantity: parseInt(item.quantity),
-            price: parseInt(item.price),
-            original_price: parseInt(item.original_price),
-            total: parseInt(item.total),
-            total_discount: parseInt(item.total_discount),
-            total_tax: parseInt(item.total_tax),
+            quantity: parseFloat(item.quantity),
+            price: parseFloat(item.price),
+            original_price: parseFloat(item.original_price),
+            total: parseFloat(item.total),
+            total_discount: parseFloat(item.total_discount),
+            total_tax: parseFloat(item.total_tax),
             restaurantID: restaurantId,
             createdAt: new Date(Order.created),
-            packingCharge: parseInt(item.packing_charge),
+            packingCharge: parseFloat(item.packing_charge),
             NCFlag: parseInt(item.price) === 0 ? true : false,
           };
         })

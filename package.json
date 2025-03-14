@@ -11,7 +11,8 @@
     "prettier:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky",
-    "lint": "npx eslint"
+    "lint": "npx eslint",
+    "manual-process": "ts-node src/manualProcessor.ts"
   },
   "keywords": [],
   "author": "",

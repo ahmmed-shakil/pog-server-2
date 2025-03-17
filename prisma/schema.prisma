@@ -66,7 +66,7 @@ model Order {
 model OrderItem {
   id                       Int                       @id @unique @default(autoincrement())
   orderID                  Int
-  quantity                 Int?
+  quantity                 Float?
   createdAt                DateTime
   NCFlag                   Boolean                   @default(false)
   item_id                  String?

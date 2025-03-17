@@ -12,7 +12,7 @@ export const sendDataToDb = async (response: any) => {
       }
       const checkOrderExists = await prisma.order.findUnique({ where: { order_id: Order?.id?.toString() } });
       if (checkOrderExists) {
-        console.log(`Skippingn Order as order_id already exists`);
+        console.log(`Skipping Order as order_id already exists`);
         return;
       }
 
@@ -122,6 +122,8 @@ export const sendDataToDb = async (response: any) => {
           return {
             item_id: itemExistsById?.id || itemExistsByName?.id || (await createItem)?.id,
             quantity: parseFloat(item.quantity),
+            // quantity: item?.quantity,
+            // quantity: item.quantity ? Number(item.quantity) || 0 : 0,
             price: parseFloat(item.price),
             original_price: parseFloat(item.original_price),
             total: parseFloat(item.total),
@@ -205,6 +207,7 @@ export const sendDataToDb = async (response: any) => {
           },
         },
       });
+
       // console.log('🚀 ~ sendDataToDb ~ createdOrder:', createdOrder);
     }
     return true;

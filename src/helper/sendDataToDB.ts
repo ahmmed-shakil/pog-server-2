@@ -37,10 +37,10 @@ export const sendDataToDb = async (response: any) => {
           }
 
           const itemExistsById = await prisma.restaurant_new_SKU_items.findFirst({
-            where: { restaurant_id: restaurantId, item_id: parseInt(item.item_id) },
+            where: { restaurant_id: restaurantId, item_id: parseInt(item.item_id), group_category_id: item?.group_category_id },
           });
           const itemExistsByName = await prisma.restaurant_new_SKU_items.findFirst({
-            where: { restaurant_id: restaurantId, name: item.name },
+            where: { restaurant_id: restaurantId, name: item.name, group_category_id: item?.group_category_id },
           });
           let createItem = null;
           if (itemExistsById || itemExistsByName) {

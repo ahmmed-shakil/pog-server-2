@@ -8,14 +8,14 @@ export const sendDataToDb = async (response: any) => {
       const { Order, OrderItem } = orderData;
       if (!Order?.id) {
         console.log(`Skippingn Order as order_id not found`);
-        // return;
-        continue;
+        return;
+        // continue;
       }
       const checkOrderExists = await prisma.order.findUnique({ where: { order_id: Order?.id?.toString() } });
       if (checkOrderExists) {
         console.log(`Skipping Order as order_id already exists`);
-        // return;
-        continue;
+        return;
+        // continue;
       }
 
       // Validate and filter OrderItems
